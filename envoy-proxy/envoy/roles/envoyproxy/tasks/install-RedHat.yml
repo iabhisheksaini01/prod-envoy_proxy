@@ -1,0 +1,53 @@
+---
+- name: Create Envoy config directory
+  ansible.builtin.file:
+    path: "{{ envoy_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Download Envoy binary
+  ansible.builtin.get_url:
+    url: "https://github.com/envoyproxy/envoy/releases/download/v{{ envoy_version }}/envoy-{{ envoy_version }}-linux-x86_64"
+    dest: "{{ envoy_binary_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Verify Envoy binary
+  ansible.builtin.command: "{{ envoy_binary_path }} --version"
+  register: envoy_version_check
+  changed_when: false
+
+- name: Show Envoy version
+  ansible.builtin.debug:
+    var: envoy_version_check.stdout
+
+- name: Deploy Envoy config file
+  ansible.builtin.template:
+    src: envoy.yaml.j2
+    dest: "{{ envoy_config_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Validate Envoy config
+    - Restart Envoy
+
+- name: Create systemd service file
+  ansible.builtin.template:
+    src: envoy.service.j2
+    dest: /etc/systemd/system/envoy.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Reload systemd
+
+- name: Enable and start Envoy
+  ansible.builtin.systemd:
+    name: "{{ envoy_service_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true

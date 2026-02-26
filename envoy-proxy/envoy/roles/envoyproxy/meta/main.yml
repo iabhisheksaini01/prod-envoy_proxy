@@ -1,0 +1,8 @@
+---
+galaxy_info:
+  author: abhishek
+  description: Install and configure Envoy Proxy dynamically with HA support
+  license: MIT
+  min_ansible_version: "2.9"
+
+dependencies: []

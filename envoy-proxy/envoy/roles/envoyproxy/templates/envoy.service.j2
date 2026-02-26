@@ -1,0 +1,18 @@
+[Unit]
+Description=Envoy Proxy
+After=network.target
+
+[Service]
+
+ExecStart={{ envoy_binary_path if ansible_os_family == "RedHat" else "/usr/bin/envoy" }} -c {{ envoy_config_path }}
+
+Restart=always
+RestartSec=5
+
+LimitNOFILE=65536
+
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

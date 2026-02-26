@@ -1,0 +1,6 @@
+---
+- hosts: envoy_servers
+  become: yes
+
+  roles:
+    - envoyproxy
